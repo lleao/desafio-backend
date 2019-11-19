@@ -33,4 +33,8 @@ public class Item {
 
     @Column(name = "price")
     private BigDecimal price;
+
+    @JoinColumn(name = "fk_category")
+    @ManyToOne
+    private Category category;
 }

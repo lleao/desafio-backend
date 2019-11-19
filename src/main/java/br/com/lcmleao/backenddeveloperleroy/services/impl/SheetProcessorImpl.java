@@ -8,6 +8,7 @@ import br.com.lcmleao.backenddeveloperleroy.enums.ProcessState;
 import br.com.lcmleao.backenddeveloperleroy.exceptions.SheetProcessException;
 import br.com.lcmleao.backenddeveloperleroy.repositories.CategoryRepository;
 import br.com.lcmleao.backenddeveloperleroy.repositories.FileStoreRepository;
+import br.com.lcmleao.backenddeveloperleroy.repositories.ItemRepository;
 import br.com.lcmleao.backenddeveloperleroy.repositories.SheetRepository;
 import br.com.lcmleao.backenddeveloperleroy.services.SheetProcessor;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -22,7 +23,10 @@ import javax.transaction.Transactional;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class SheetProcessorImpl implements SheetProcessor {
@@ -31,6 +35,9 @@ public class SheetProcessorImpl implements SheetProcessor {
 
     @Autowired
     private SheetRepository sheetRepository;
+
+    @Autowired
+    private ItemRepository itemRepository;
 
     @Autowired
     private CategoryRepository categoryRepository;
@@ -65,14 +72,19 @@ public class SheetProcessorImpl implements SheetProcessor {
             sheet.setState(ProcessState.PROCESSING);
             sheet = sheetRepository.save(sheet);
 
-            cat = transform(sheet.getFileStore().getResource().openStream());
+            Map<Category, List<Item>> ret = transform(sheet.getFileStore().getResource().openStream());
 
             sheet.setSuccess(true);
             sheet.setState(ProcessState.DONE);
             sheet = sheetRepository.save(sheet);
 
             sheetRepository.save(sheet);
-            categoryRepository.save(cat);
+            ret.forEach( (key, vals) -> {
+                Category newCat = categoryRepository.save(key);
+                vals.forEach( (item) -> item.setCategory(newCat) );
+                itemRepository.saveAll(vals);
+            } );
+
         } catch (Exception e) {
             sheet.setSuccess(false);
             sheet.setState(ProcessState.ERROR);
@@ -81,7 +93,8 @@ public class SheetProcessorImpl implements SheetProcessor {
         }
     }
 
-    public Category transform(InputStream in ) {
+    public Map<Category, List<Item>> transform(InputStream in ) {
+        Map<Category, List<Item>> mapa = new HashMap<>();
         XSSFWorkbook workbook = null;
         XSSFSheet worksheet;
         Category category = new Category();
@@ -133,7 +146,7 @@ public class SheetProcessorImpl implements SheetProcessor {
                         chook.cell().getSecond()+1
                 )
         );
-        category.setItens( new LinkedList<>());
+        mapa.put( category, new LinkedList<>() );
         // Começa a consumir a partir da linha de dados
         for(int i=headerHook.cell().getFirst()+1; i < worksheet.getPhysicalNumberOfRows(); i++) {
             XSSFRow row = worksheet.getRow(i);
@@ -145,10 +158,10 @@ public class SheetProcessorImpl implements SheetProcessor {
                     .description( getCellValueAsString(row, ptr++ ) )
                     .price( getCellValueAsBigDecimal(row, ptr++ ) )
                     .build();
-            category.getItens().add(item);
+            mapa.get(category).add(item);
         }
 
-        return category;
+        return mapa;
     }
 
     private Boolean getCellValueAsBoolean(XSSFRow row, Integer col) {

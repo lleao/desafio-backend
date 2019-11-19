@@ -4,6 +4,7 @@ import br.com.lcmleao.backenddeveloperleroy.dto.FileStoreDTO;
 import br.com.lcmleao.backenddeveloperleroy.exceptions.StorageException;
 import br.com.lcmleao.backenddeveloperleroy.services.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,7 +33,7 @@ public class FileController {
 
     @ExceptionHandler(StorageException.class)
     public ResponseEntity handle(StorageException ex) {
-        return ResponseEntity.badRequest().build();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
     }
 
 }
