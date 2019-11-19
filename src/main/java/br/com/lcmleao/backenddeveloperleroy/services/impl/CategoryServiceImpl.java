@@ -5,6 +5,7 @@ import br.com.lcmleao.backenddeveloperleroy.dto.ItemDTO;
 import br.com.lcmleao.backenddeveloperleroy.entities.Category;
 import br.com.lcmleao.backenddeveloperleroy.entities.Item;
 import br.com.lcmleao.backenddeveloperleroy.repositories.CategoryRepository;
+import br.com.lcmleao.backenddeveloperleroy.repositories.ItemRepository;
 import br.com.lcmleao.backenddeveloperleroy.services.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private ItemRepository itemRepository;
 
     @Override
     public List<CategoryDTO> listaAll() {
@@ -35,6 +39,12 @@ public class CategoryServiceImpl implements CategoryService {
         return CategoryDTO.builder()
                 .category(entity.getCategory())
                 .id(entity.getId())
+                .itens(
+                        itemRepository.findAllItemByCategoryId(entity.getId())
+                                .stream()
+                                .map( (item) -> toDTO(item) )
+                                .collect(Collectors.toList())
+                )
                 .build();
     }
 
