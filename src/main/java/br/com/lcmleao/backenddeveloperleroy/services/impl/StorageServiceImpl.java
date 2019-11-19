@@ -39,10 +39,8 @@ public class StorageServiceImpl implements StorageService {
     @Override
     public StorageResult store(String originalFilename, Resource origin) {
         init();
-        Path target;
-        Resource dir = storageConfiguration.getDirectory();
+        Path target = storageConfiguration.getDirectory();
         try {
-            target = Paths.get(dir.getURI());
             Path result = getUniqueName(target, originalFilename);
             Files.copy( origin.getInputStream(), result, StandardCopyOption.REPLACE_EXISTING);
             return () -> new FileSystemResource(result);
@@ -53,12 +51,16 @@ public class StorageServiceImpl implements StorageService {
     }
     /**
      * Cria a estrutura de pastas caso não existam
-     * */
-    private void init() {
+     *
+     * @return*/
+    private Path init() {
         try {
-            Files.createDirectories(storageConfiguration.getDirectory().getFile().toPath());
+            return
+            Files.createDirectories(
+                    Paths.get("").resolve(storageConfiguration.getDirectory())
+            );
         } catch (IOException e) {
-            throw new StorageInitException("Não foi possível criar o local para armazenamento: " + storageConfiguration.getDirectory().getFilename(), e);
+            throw new StorageInitException("Não foi possível criar o local para armazenamento: " + storageConfiguration.getDirectory(), e);
         }
     }
 
