@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/***
+ * Implementação do serviço de Sheet
+ */
 @Service
 public class SheetServiceImpl implements SheetService {
     @Autowired
@@ -20,18 +23,29 @@ public class SheetServiceImpl implements SheetService {
     @Autowired
     private SheetRepository sheetRepository;
 
+    /***
+     * Retorna uma lista de DTO contendo todas as Sheet
+     * @return List<SheetDTO>
+     */
     @Override
     public List<SheetDTO> listaAll() {
         return sheetRepository.findAll().stream().map(
                 (entity) -> toDTO(entity)
         ).collect(Collectors.toList());
     }
-
+    /***
+     * Retorna um opcional do DTO contendo o item baseado no id
+     * @return Optional<SheetDTO>
+     */
     @Override
     public Optional<SheetDTO> listById(Long id) {
         return sheetRepository.findById(id).map((entity) -> toDTO(entity));
     }
-
+    /***
+     * Informa o status de processamento da planilha
+     * @return Retorna true caso o status de processamento da planilha seja sucesso ou falso
+     *      * caso não tenha sido importada ou tenha ocorrido erro na importação
+     */
     @Override
     public Boolean getStatusById(Long id) {
         return sheetRepository.findById(id).map(
@@ -39,17 +53,25 @@ public class SheetServiceImpl implements SheetService {
         ).orElse(false);
     }
 
+    /***
+     * Solicita o processamento sincrono da planilha
+     * @param id Id da planilha
+     */
     @Override
     public void processSheet(Long id) {
         sheetProcessor.processSheet(id);
     }
 
-
-    private SheetDTO toDTO(Sheet enitty) {
+    /***
+     * Metódo auxiliar para transformar a entidade em DTO
+     * @param entity
+     * @return SheetDTO
+     */
+    private SheetDTO toDTO(Sheet entity) {
         return SheetDTO.builder()
-                .id( enitty.getId() )
-                .state( enitty.getState() )
-                .success( enitty.getSuccess() )
+                .id( entity.getId() )
+                .state( entity.getState() )
+                .success( entity.getSuccess() )
                 .build();
     }
 

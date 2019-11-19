@@ -15,6 +15,9 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.InputStream;
 
+/***
+ * Implementação do serviço de armazenamento de arquivo
+ */
 @Service
 public class FileServiceImpl implements FileService {
     @Autowired
@@ -26,10 +29,13 @@ public class FileServiceImpl implements FileService {
     @Autowired
     private SheetProcessor sheetProcessor;
 
-    public void saveFile() {
-
-    }
-
+    /***
+     * Salva o arquivo de forma acessível ao sistema.
+     * Move para o local acessível e insere no banco dados referente ao arquivo.
+     * @param originalFilename Nome original do arquivo
+     * @param inputStream Stream para conteúdo do arquivo
+     * @return FileStoreDTO
+     */
     @Override
     public FileStoreDTO uploadFile(String originalFilename, InputStream inputStream) {
         StorageService.StorageResult result;
@@ -45,6 +51,7 @@ public class FileServiceImpl implements FileService {
                     .resource( result.resource().getURL() )
                     .build();
             saved = fileStoreRepository.save(file);
+            // Insere o arquivo na fila de processamento
             sheetProcessor.queueFile(saved.getId());
             return FileStoreDTO.builder()
                     .id( saved.getId() )

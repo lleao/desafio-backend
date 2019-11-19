@@ -14,6 +14,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/***
+ * Implementação do serviço para acesso a Categoy
+ */
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
@@ -23,18 +26,30 @@ public class CategoryServiceImpl implements CategoryService {
     @Autowired
     private ItemRepository itemRepository;
 
+    /***
+     * Retorna uma lista de DTO contendo todas as categorias
+     * @return List<CategoryDTO>
+     */
     @Override
     public List<CategoryDTO> listaAll() {
         return categoryRepository.findAll().stream().map(
                 (entity) -> toDTO(entity)
         ).collect(Collectors.toList());
     }
-
+    /***
+     * Retorna um opcional do DTO contendo a categoria
+     * @return Optional<CategoryDTO>
+     */
     @Override
     public Optional<CategoryDTO> listById(Long id) {
         return categoryRepository.findById(id).map((entity) -> toDTO(entity));
     }
 
+    /***
+     * Metódo auxiliar para converter a entidade em DTO
+     * @param entity
+     * @return CategoryDTO
+     */
     private CategoryDTO toDTO(Category entity) {
         return CategoryDTO.builder()
                 .category(entity.getCategory())
@@ -47,7 +62,11 @@ public class CategoryServiceImpl implements CategoryService {
                 )
                 .build();
     }
-
+    /***
+     * Metódo auxiliar para converter a entidade em DTO
+     * @param eachItem
+     * @return ItemDTO
+     */
     private ItemDTO toDTO(Item eachItem) {
         return ItemDTO.builder()
                 .id(eachItem.getId())

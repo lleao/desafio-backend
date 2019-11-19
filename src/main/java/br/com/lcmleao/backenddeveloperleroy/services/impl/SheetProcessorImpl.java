@@ -28,6 +28,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/***
+ * Implementação do serviço de processamento de planilha
+ */
 @Service
 public class SheetProcessorImpl implements SheetProcessor {
     @Autowired
@@ -42,12 +45,16 @@ public class SheetProcessorImpl implements SheetProcessor {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    /***
+     * Interface para uma localização dentro do arquivo.
+     * Serve para marcar pontos importantes e então percorrer o arquivo de forma relativa
+     */
     public interface Hook {
         public Pair<Integer, Integer> cell();
     }
 
     /***
-     * Enfileira o arquivo para ser processado
+     * Enfileira o arquivo para ser processado.
      * @param id Do arquivo que deve ser enfileirado
      */
     @Transactional
@@ -61,26 +68,32 @@ public class SheetProcessorImpl implements SheetProcessor {
      * Processa uma planilha baseado no id
      * @param sheetId
      */
+    @Transactional
     @Override
     public void processSheet(Long sheetId) {
+        // Obtém uma planilha que deve ser processada
         Sheet sheet = sheetRepository.findById(sheetId).orElseThrow(() -> new SheetProcessException("Planilha não localizada"));
         Category cat;
+        // Se não está no estado correto lança erro
         if ( sheet.getState() != ProcessState.QUEUED ) {
             throw new SheetProcessException("A planilha não pode ser processada. STATE != ProcessState.QUEUED");
         }
         try {
+            Map<Category, List<Item>> ret;
+
             sheet.setState(ProcessState.PROCESSING);
             sheet = sheetRepository.save(sheet);
 
-            Map<Category, List<Item>> ret = transform(sheet.getFileStore().getResource().openStream());
+            ret = transform(sheet.getFileStore().getResource().openStream());
 
             sheet.setSuccess(true);
             sheet.setState(ProcessState.DONE);
             sheet = sheetRepository.save(sheet);
 
             sheetRepository.save(sheet);
+            // Para cada categoria, salva os itens
             ret.forEach( (key, vals) -> {
-                Category newCat = categoryRepository.save(key);
+                Category newCat = getOrCreateCategory(key);
                 vals.forEach( (item) -> item.setCategory(newCat) );
                 itemRepository.saveAll(vals);
             } );
@@ -93,7 +106,24 @@ public class SheetProcessorImpl implements SheetProcessor {
         }
     }
 
-    public Map<Category, List<Item>> transform(InputStream in ) {
+    /***
+     * Retorna uma nova categoria ou obtém uma existente do banco
+     * @param key Categoria exemplo
+     * @return Category categoria criada ou obtida
+     */
+    private Category getOrCreateCategory(Category key) {
+        return categoryRepository.findOne(
+                Example.of(key)
+        ).orElseGet( () -> categoryRepository.save(key) );
+    }
+
+    /***
+     * Transforma o arquivo em entidades passiveis de serem salvas no banco.
+     * Retorna um mapa, pois, pode ser possível adicionar uma categoria por aba
+     * @param in Stream para os dados que devem ser importados
+     * @return
+     */
+    public Map<Category, List<Item>> transform( InputStream in ) {
         Map<Category, List<Item>> mapa = new HashMap<>();
         XSSFWorkbook workbook = null;
         XSSFSheet worksheet;
@@ -139,7 +169,6 @@ public class SheetProcessorImpl implements SheetProcessor {
             }
 
         }
-
         category.setCategory(
                 getCellValueAsString(
                         worksheet.getRow( chook.cell().getFirst() ),
@@ -164,6 +193,12 @@ public class SheetProcessorImpl implements SheetProcessor {
         return mapa;
     }
 
+    /***
+     * Metódo auxiliar para a partir de uma linha retornar o valor como Boolean
+     * @param row
+     * @param col
+     * @return
+     */
     private Boolean getCellValueAsBoolean(XSSFRow row, Integer col) {
 
         switch (row.getCell(col).getCellTypeEnum()) {
@@ -172,7 +207,12 @@ public class SheetProcessorImpl implements SheetProcessor {
         }
         return false;
     }
-
+    /***
+     * Metódo auxiliar para a partir de uma linha retornar o valor como String
+     * @param row
+     * @param col
+     * @return
+     */
     private String getCellValueAsString(XSSFRow row, Integer col) {
 
         switch (row.getCell(col).getCellTypeEnum()) {
@@ -181,7 +221,12 @@ public class SheetProcessorImpl implements SheetProcessor {
         }
         return row.getCell(col).getRawValue();
     }
-
+    /***
+     * Metódo auxiliar para a partir de uma linha retornar o valor como BigDecimal
+     * @param row
+     * @param col
+     * @return
+     */
     private BigDecimal getCellValueAsBigDecimal(XSSFRow row, Integer col) {
 
         switch (row.getCell(col).getCellTypeEnum()) {
@@ -191,6 +236,11 @@ public class SheetProcessorImpl implements SheetProcessor {
         return new BigDecimal( row.getCell(col).getRawValue() );
     }
 
+    /***
+     * Obtém ou cria uma planilha baseado no arquivo
+     * @param file
+     * @return
+     */
     private Sheet getOrCreateSheet(FileStore file) {
         return sheetRepository.findOne(
                 Example.of(
