@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.net.URL;
 import java.time.LocalDateTime;
 
 @Data
@@ -16,7 +15,9 @@ public class FileStoreDTO {
 
     private Long id;
 
+    private String md5;
+
     private LocalDateTime uploadedAt;
 
-    private URL resource;
+    private String resource;
 }

@@ -1,7 +1,8 @@
 package br.com.lcmleao.backenddeveloperleroy.enums;
 
 public enum ProcessState {
-    DONE,
+    PROCESSING,
     ERROR,
+    DONE,
     QUEUED
 }

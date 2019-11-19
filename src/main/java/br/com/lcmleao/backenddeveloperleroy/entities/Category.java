@@ -22,6 +22,6 @@ public class Category {
     @Column(name = "category")
     private String category;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private List<Item> itens;
 }

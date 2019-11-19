@@ -25,6 +25,9 @@ public class FileStore {
     @CreationTimestamp
     private LocalDateTime uploadedAt;
 
+    @Column(name = "md5")
+    private String md5;
+
     @Column(name = "resource", nullable = false)
     private URL resource;
 }

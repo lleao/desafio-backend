@@ -1,8 +1,8 @@
 package br.com.lcmleao.backenddeveloperleroy.controllers;
 
+import br.com.lcmleao.backenddeveloperleroy.dto.FileStoreDTO;
 import br.com.lcmleao.backenddeveloperleroy.exceptions.StorageException;
 import br.com.lcmleao.backenddeveloperleroy.services.FileService;
-import br.com.lcmleao.backenddeveloperleroy.services.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,10 +21,10 @@ public class FileController {
     @PostMapping(path = "/upload")
     public ResponseEntity<Object> upload(@RequestParam("file") MultipartFile file) {
 
-        StorageService.StorageResult result;
+        FileStoreDTO result;
         try {
             result = fileService.uploadFile(file.getOriginalFilename(), file.getInputStream() );
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.ok(result);
         } catch (IOException e) {
             throw new StorageException(e);
         }

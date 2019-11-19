@@ -1,7 +1,9 @@
 package br.com.lcmleao.backenddeveloperleroy.services;
 
+import br.com.lcmleao.backenddeveloperleroy.dto.FileStoreDTO;
+
 import java.io.InputStream;
 
 public interface FileService {
-    StorageService.StorageResult uploadFile(String originalFilename, InputStream inputStream);
+    FileStoreDTO uploadFile(String originalFilename, InputStream inputStream);
 }
