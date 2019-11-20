@@ -49,7 +49,7 @@ public class SheetController {
             "Se retornar 404 ou a lista não existe ou não foi processada ou está em processamento.\n" +
             "Se retornar 200 com true, significa que foi processada com sucesso. Se retornar 200 com false, não foi processada e algum erro ocorreu")
     @GetMapping(path = "/{id}/status")
-    public ResponseEntity<Object> getStatus(@PathVariable("id") Long id) {
+    public ResponseEntity<Boolean> getStatus(@PathVariable("id") Long id) {
         return ResponseEntity.ok(
                 sheetService.getStatusById(id)
         );

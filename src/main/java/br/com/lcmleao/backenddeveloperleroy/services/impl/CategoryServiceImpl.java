@@ -4,6 +4,7 @@ import br.com.lcmleao.backenddeveloperleroy.dto.CategoryDTO;
 import br.com.lcmleao.backenddeveloperleroy.dto.ItemDTO;
 import br.com.lcmleao.backenddeveloperleroy.entities.Category;
 import br.com.lcmleao.backenddeveloperleroy.entities.Item;
+import br.com.lcmleao.backenddeveloperleroy.exceptions.CategoryException;
 import br.com.lcmleao.backenddeveloperleroy.repositories.CategoryRepository;
 import br.com.lcmleao.backenddeveloperleroy.repositories.ItemRepository;
 import br.com.lcmleao.backenddeveloperleroy.services.CategoryService;
@@ -11,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /***
@@ -41,8 +41,8 @@ public class CategoryServiceImpl implements CategoryService {
      * @return Optional<CategoryDTO>
      */
     @Override
-    public Optional<CategoryDTO> listById(Long id) {
-        return categoryRepository.findById(id).map((entity) -> toDTO(entity));
+    public CategoryDTO findById(Long id) {
+        return categoryRepository.findById(id).map((entity) -> toDTO(entity)).orElseThrow( () -> new CategoryException("Categoria não localizada") );
     }
 
     /***

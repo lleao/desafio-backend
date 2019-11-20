@@ -12,6 +12,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Api(
         produces = MediaType.APPLICATION_JSON_VALUE,
         value = "Api para manipulação de Item"
@@ -27,7 +29,7 @@ public class ItemController {
             value = "Baseado no id da categoria, retorna uma lista de itens"
     )
     @GetMapping("/category/{id}")
-    public ResponseEntity<Object> geItensByCategory(@ApiParam(required = true, name = "id") @PathVariable("id") Long id) {
+    public ResponseEntity<List<ItemDTO>> geItensByCategory(@ApiParam(required = true, name = "id") @PathVariable("id") Long id) {
         return ResponseEntity.ok(itemService.listaAll(id));
     }
 
@@ -35,7 +37,7 @@ public class ItemController {
             value = "Baseado no id da categoria e no item, efetua a atualização do item"
     )
     @PutMapping("/category/{catId}/item")
-    public ResponseEntity<Object> updateItem(
+    public ResponseEntity<ItemDTO> updateItem(
         @ApiParam(required = true) @PathVariable("catId") Long categoryId,
         @ApiParam(required = true) @RequestBody ItemDTO item
     ) {
