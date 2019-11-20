@@ -21,6 +21,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.Map;
 
 /**
  * Class that abstract test context management and REST API invocation.
@@ -112,13 +114,16 @@ public class AbstractSteps {
     private <T> T deserializar(Class<T> clazzReturn, MvcResult ret) throws Exception {
         String retAsString;
         if (  null != ret ) {
-            retAsString = ret.getResponse().getContentAsString();
-            return mapper.readValue(retAsString, clazzReturn);
+            retAsString = ret.getResponse().getContentAsString(Charset.forName("UTF-8"));
+            // Se não foi 2xx deve lançar erro
+            if (  ret.getResponse().getStatus() != 200) {
+                Map error = mapper.readValue(retAsString, Map.class);
+                throw new Exception(error.get("message").toString());
+            }
+
+            return retAsString.length() > 0 ? mapper.readValue(retAsString, clazzReturn) : clazzReturn.newInstance();
         }
-        // Se não foi 2xx deve lançar erro
-        if (  ret.getResponse().getStatus() != 200) {
-            throw new Exception("Retorno vazio e status != 200");
-        }
+
         // Tenta retornar uma instância da classe vazia
         return clazzReturn.newInstance();
     }

@@ -128,7 +128,6 @@ public class SheetProcessorImpl implements SheetProcessor {
             sheet.setState(ProcessState.DONE);
             sheet = sheetRepository.save(sheet);
 
-            sheetRepository.save(sheet);
             // Para cada categoria, salva os itens
             ret.forEach( (key, vals) -> {
                 Category newCat = getOrCreateCategory(key);
@@ -140,7 +139,6 @@ public class SheetProcessorImpl implements SheetProcessor {
             sheet.setSuccess(false);
             sheet.setState(ProcessState.ERROR);
             sheetRepository.save(sheet);
-            throw new SheetProcessException("Resource Inacessível", e);
         }
     }
 

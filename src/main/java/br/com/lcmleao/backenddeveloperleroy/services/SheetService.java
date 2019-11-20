@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface SheetService {
     public List<SheetDTO> listaAll();
-    public Optional<SheetDTO> listById( Long id );
+    public Optional<SheetDTO> findById(Long id );
     public Boolean getStatusById( Long id );
     public void processSheet( Long id );
 }

@@ -34,7 +34,7 @@ public class SheetController {
     @GetMapping("/{id}")
     public ResponseEntity<SheetDTO> getSheetById(@ApiParam(required = true) @PathVariable("id") Long id) {
         return ResponseEntity.ok(
-                sheetService.listById(id).get()
+                sheetService.findById(id).orElseThrow( () -> new SheetException("Planilha não localizada", 404) )
         );
     }
 

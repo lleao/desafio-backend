@@ -39,7 +39,7 @@ public class SheetServiceImpl implements SheetService {
      * @return Optional<SheetDTO>
      */
     @Override
-    public Optional<SheetDTO> listById(Long id) {
+    public Optional<SheetDTO> findById(Long id) {
         return sheetRepository.findById(id).map((entity) -> toDTO(entity));
     }
     /***
