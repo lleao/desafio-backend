@@ -2,6 +2,7 @@ package br.com.lcmleao.backenddeveloperleroy.services.impl;
 
 import br.com.lcmleao.backenddeveloperleroy.dto.SheetDTO;
 import br.com.lcmleao.backenddeveloperleroy.entities.Sheet;
+import br.com.lcmleao.backenddeveloperleroy.exceptions.SheetException;
 import br.com.lcmleao.backenddeveloperleroy.repositories.SheetRepository;
 import br.com.lcmleao.backenddeveloperleroy.services.SheetProcessor;
 import br.com.lcmleao.backenddeveloperleroy.services.SheetService;
@@ -49,8 +50,18 @@ public class SheetServiceImpl implements SheetService {
     @Override
     public Boolean getStatusById(Long id) {
         return sheetRepository.findById(id).map(
-                (entity) -> entity.getSuccess()
-        ).orElse(false);
+                (entity) -> {
+                    switch (entity.getState()){
+                        case QUEUED: throw new SheetException("Planilha ainda não processada", 404);
+                        case PROCESSING: throw new SheetException("Planilha em processamento", 404);
+                        case DONE: return true;
+                        case ERROR: return false;
+                    }
+                    return entity.getSuccess();
+                }
+        ).orElseThrow(
+                () -> new SheetException("Planilha não existe")
+        );
     }
 
     /***
