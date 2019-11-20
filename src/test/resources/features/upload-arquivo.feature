@@ -10,4 +10,4 @@ Cenário: 1 - Upload de arquivo com sucesso
 Cenário: 2 - Upload de arquivo com falha
   Dado um arquivo inválido de importação
   Quando o upload é efetuado
-  Então  o arquivo é enviado com 'erro'
+  Então o arquivo é enviado com 'sucesso' e NÃO é adicionado a fila
