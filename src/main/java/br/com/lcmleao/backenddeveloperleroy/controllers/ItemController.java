@@ -54,7 +54,7 @@ public class ItemController {
 
     @ExceptionHandler(ItemException.class)
     public ResponseEntity handle(ItemException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex);
     }
 
 }

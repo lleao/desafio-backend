@@ -9,6 +9,7 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
@@ -75,7 +76,7 @@ public class AbstractSteps {
         MvcResult ret;
 
         if ( null != body ) {
-            post.content(body.toString().getBytes());
+            post.content(mapper.writeValueAsBytes(body));
         }
         ret = mock.perform(
                 post
@@ -89,7 +90,8 @@ public class AbstractSteps {
         MvcResult ret;
 
         if ( null != body ) {
-            put.content(body.toString().getBytes());
+            put.contentType(MediaType.APPLICATION_JSON);
+            put.content(mapper.writeValueAsBytes(body));
         }
         ret = mock.perform(
                 put
