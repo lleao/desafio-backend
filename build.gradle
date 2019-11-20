@@ -43,6 +43,7 @@ dependencies {
 	testImplementation('io.cucumber:cucumber-java8:4.7.2')
 	testImplementation('io.cucumber:cucumber-spring:4.7.2')
 	testImplementation('io.cucumber:cucumber-junit:4.7.2')
+	testImplementation('com.github.fridujo:rabbitmq-mock:1.0.12')
 }
 
 test {
