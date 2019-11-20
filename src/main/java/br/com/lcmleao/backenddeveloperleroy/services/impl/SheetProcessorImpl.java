@@ -13,6 +13,7 @@ import br.com.lcmleao.backenddeveloperleroy.repositories.FileStoreRepository;
 import br.com.lcmleao.backenddeveloperleroy.repositories.ItemRepository;
 import br.com.lcmleao.backenddeveloperleroy.repositories.SheetRepository;
 import br.com.lcmleao.backenddeveloperleroy.services.SheetProcessor;
+import lombok.extern.log4j.Log4j2;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -36,6 +37,7 @@ import java.util.Map;
 /***
  * Implementação do serviço de processamento de planilha
  */
+@Log4j2
 @Service
 public class SheetProcessorImpl implements SheetProcessor {
     @Autowired
@@ -73,12 +75,13 @@ public class SheetProcessorImpl implements SheetProcessor {
     public void queueFile(Long id) {
         FileStore file = fileStoreRepository.getOne(id);
         Sheet sheet = getOrCreateSheet(file);
+        log.debug("Adicionando a fila.");
         rabbitTemplate.convertAndSend(
                 "amq.topic",
                 queueConfiguration.getQueue(),
                 SheetDTO.builder()
-                .id( sheet.getId() )
-                .build()
+                        .id( sheet.getId() )
+                        .build()
         );
     }
 
@@ -88,9 +91,13 @@ public class SheetProcessorImpl implements SheetProcessor {
      * @return Category categoria criada ou obtida
      */
     private Category getOrCreateCategory(Category key) {
+        log.debug("Tentando localizar a categoria na base de dados.");
         return categoryRepository.findOne(
                 Example.of(key)
-        ).orElseGet( () -> categoryRepository.save(key) );
+        ).orElseGet( () -> {
+            log.debug("Criando nova categoria.");
+            return categoryRepository.save(key);
+        } );
     }
 
     /***
@@ -100,11 +107,13 @@ public class SheetProcessorImpl implements SheetProcessor {
     @Transactional
     @Override
     public void processSheet(Long sheetId) {
+        log.debug("Iniciando processamento da planilha.");
         // Obtém uma planilha que deve ser processada
         Sheet sheet = sheetRepository.findById(sheetId).orElseThrow(() -> new SheetProcessException("Planilha não localizada"));
         Category cat;
         // Se não está no estado correto lança erro
         if ( sheet.getState() != ProcessState.QUEUED ) {
+            log.debug("A planilha não pode ser processada. STATE != ProcessState.QUEUED");
             throw new SheetProcessException("A planilha não pode ser processada. STATE != ProcessState.QUEUED");
         }
         try {
@@ -112,9 +121,9 @@ public class SheetProcessorImpl implements SheetProcessor {
 
             sheet.setState(ProcessState.PROCESSING);
             sheet = sheetRepository.save(sheet);
-
+            log.debug("Iniciando parser da planilha");
             ret = transform(sheet.getFileStore().getResource().openStream());
-
+            log.debug("Fim parser da planilha");
             sheet.setSuccess(true);
             sheet.setState(ProcessState.DONE);
             sheet = sheetRepository.save(sheet);
@@ -126,7 +135,7 @@ public class SheetProcessorImpl implements SheetProcessor {
                 vals.forEach( (item) -> item.setCategory(newCat) );
                 itemRepository.saveAll(vals);
             } );
-
+            log.debug("Categoria e itens salvos no banco");
         } catch (Exception e) {
             sheet.setSuccess(false);
             sheet.setState(ProcessState.ERROR);
@@ -155,9 +164,11 @@ public class SheetProcessorImpl implements SheetProcessor {
         worksheet = workbook.getSheetAt(0);
         Hook chook = null; //Gancho para a posição de Category
         Hook headerHook = null; //Gancho para o cabeçalho
+        log.debug("Pesquisando dados na planilha...");
         for(int i = 0;i<worksheet.getPhysicalNumberOfRows() ;i++) {
             XSSFRow row = worksheet.getRow(i);
             if ( null == row ) {
+                log.debug("Linha em branco... Deve ser ignorada");
                 continue;
             }
             // Detecta onde começa o cabeçalho
@@ -168,6 +179,7 @@ public class SheetProcessorImpl implements SheetProcessor {
                                 i, j
                         );
                         headerHook = () -> cellHook;
+                        log.debug("O cabeçalho começa em L:{} C:{} ", i, j);
                         break;
                     }
                 }
@@ -178,6 +190,7 @@ public class SheetProcessorImpl implements SheetProcessor {
                         Pair<Integer, Integer> cellHook = Pair.of(
                                 i, j
                         );
+                        log.debug("Dados da categoria comça em L:{} C:{} e vai até a coluna {}", i, j, row.getLastCellNum());
                         chook = () -> cellHook;
                         break;
                     }
@@ -207,7 +220,7 @@ public class SheetProcessorImpl implements SheetProcessor {
                     .build();
             mapa.get(category).add(item);
         }
-
+        log.debug("Coleta finalizada");
         return mapa;
     }
 
@@ -260,6 +273,7 @@ public class SheetProcessorImpl implements SheetProcessor {
      * @return
      */
     private Sheet getOrCreateSheet(FileStore file) {
+        log.info("Tentando localizar a planilha na base de dados.");
         return sheetRepository.findOne(
                 Example.of(
                         Sheet.builder()
@@ -267,6 +281,7 @@ public class SheetProcessorImpl implements SheetProcessor {
                                 .build()
                 )
         ).orElseGet(() -> {
+            log.info("A planilha não existe no repositório, criando uma nova.");
             return sheetRepository.save(
                     Sheet.builder()
                             .fileStore(file)

@@ -4,10 +4,7 @@ import br.com.lcmleao.backenddeveloperleroy.dto.SheetDTO;
 import br.com.lcmleao.backenddeveloperleroy.services.SheetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -28,7 +25,7 @@ public class SheetController {
         return ResponseEntity.ok(sheetService.listById(id));
     }
 
-    @GetMapping("/process/{id}")
+    @PostMapping("/process/{id}")
     public ResponseEntity<Object> processSheetById(@PathVariable("id") Long id) {
         sheetService.processSheet(id);
         return ResponseEntity.ok().build();

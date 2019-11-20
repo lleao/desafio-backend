@@ -20,7 +20,7 @@ public class CategoryController {
         return ResponseEntity.ok(categoryService.listaAll());
     }
 
-    @GetMapping("/category/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Object> getCategoryById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(categoryService.listById(id));
     }
