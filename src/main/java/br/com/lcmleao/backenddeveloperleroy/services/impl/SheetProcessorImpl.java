@@ -1,5 +1,7 @@
 package br.com.lcmleao.backenddeveloperleroy.services.impl;
 
+import br.com.lcmleao.backenddeveloperleroy.configurations.QueueConfiguration;
+import br.com.lcmleao.backenddeveloperleroy.dto.SheetDTO;
 import br.com.lcmleao.backenddeveloperleroy.entities.Category;
 import br.com.lcmleao.backenddeveloperleroy.entities.FileStore;
 import br.com.lcmleao.backenddeveloperleroy.entities.Item;
@@ -14,9 +16,12 @@ import br.com.lcmleao.backenddeveloperleroy.services.SheetProcessor;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.util.Pair;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -45,6 +50,12 @@ public class SheetProcessorImpl implements SheetProcessor {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private QueueConfiguration queueConfiguration;
+
     /***
      * Interface para uma localização dentro do arquivo.
      * Serve para marcar pontos importantes e então percorrer o arquivo de forma relativa
@@ -62,6 +73,24 @@ public class SheetProcessorImpl implements SheetProcessor {
     public void queueFile(Long id) {
         FileStore file = fileStoreRepository.getOne(id);
         Sheet sheet = getOrCreateSheet(file);
+        rabbitTemplate.convertAndSend(
+                "amq.topic",
+                queueConfiguration.getQueue(),
+                SheetDTO.builder()
+                .id( sheet.getId() )
+                .build()
+        );
+    }
+
+    /***
+     * Retorna uma nova categoria ou obtém uma existente do banco
+     * @param key Categoria exemplo
+     * @return Category categoria criada ou obtida
+     */
+    private Category getOrCreateCategory(Category key) {
+        return categoryRepository.findOne(
+                Example.of(key)
+        ).orElseGet( () -> categoryRepository.save(key) );
     }
 
     /***
@@ -104,17 +133,6 @@ public class SheetProcessorImpl implements SheetProcessor {
             sheetRepository.save(sheet);
             throw new SheetProcessException("Resource Inacessível", e);
         }
-    }
-
-    /***
-     * Retorna uma nova categoria ou obtém uma existente do banco
-     * @param key Categoria exemplo
-     * @return Category categoria criada ou obtida
-     */
-    private Category getOrCreateCategory(Category key) {
-        return categoryRepository.findOne(
-                Example.of(key)
-        ).orElseGet( () -> categoryRepository.save(key) );
     }
 
     /***
@@ -257,5 +275,14 @@ public class SheetProcessorImpl implements SheetProcessor {
                             .build()
             );
         });
+    }
+
+    /***
+     * Consome uma planilha que está na fila
+     * @param sheet
+     */
+    @RabbitListener(queues = "SheetProcessor")
+    public void consumeSheetQueue(@Payload SheetDTO sheet) {
+        processSheet(sheet.getId());
     }
 }

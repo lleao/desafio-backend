@@ -12,6 +12,17 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: update
+  rabbitmq:
+    host: 172.16.0.13
+    port: 5672
+    username: guest
+    password: guest
+  cloud:
+    stream:
+      bindings:
+        output:
+          destination: SheetProcessor
 
 storage:
   directory: /tmp/upload
+
