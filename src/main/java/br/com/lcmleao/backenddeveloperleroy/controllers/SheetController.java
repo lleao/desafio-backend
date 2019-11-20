@@ -45,8 +45,8 @@ public class SheetController {
         return ResponseEntity.ok().build();
     }
 
-    @ApiOperation(value = "Retorna o status de processamento de uma lista. " +
-            "Se retornar 404 ou a lista não existe ou não foi processada ou está em processamento." +
+    @ApiOperation(value = "Retorna o status de processamento de uma lista.\n" +
+            "Se retornar 404 ou a lista não existe ou não foi processada ou está em processamento.\n" +
             "Se retornar 200 com true, significa que foi processada com sucesso. Se retornar 200 com false, não foi processada e algum erro ocorreu")
     @GetMapping(path = "/{id}/status")
     public ResponseEntity<Object> getStatus(@PathVariable("id") Long id) {
@@ -56,6 +56,6 @@ public class SheetController {
     }
     @ExceptionHandler(SheetException.class)
     public ResponseEntity handle(SheetException ex) {
-        return ResponseEntity.status(ex.getHttpStatus()).body(ex.getMessage());
+        return ResponseEntity.status(ex.getHttpStatus()).body(ex);
     }
 }
