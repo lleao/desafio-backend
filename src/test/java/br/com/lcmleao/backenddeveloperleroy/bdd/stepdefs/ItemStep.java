@@ -7,7 +7,7 @@ import io.cucumber.java.pt.Quando;
 
 public class ItemStep extends AbstractSteps {
 
-    @E("que há uma categoria com ao menos (\\d) itens")
+    @E("que há uma categoria com ao menos (.*) itens")
     public void eHaUmaCategoriaComAoMenosXItens(final Integer quantidadeItens) {
 
     }
@@ -32,7 +32,7 @@ public class ItemStep extends AbstractSteps {
 
     }
 
-    @Entao("ao menos (\\d) itens são retornados")
+    @Entao("ao menos (.*) itens são retornados")
     public void entaoAoMenosXItensRetornados(final Integer quantidadeItens) {
 
     }
