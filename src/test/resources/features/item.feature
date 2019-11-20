@@ -10,17 +10,17 @@ Cenário: 1 - Lista de item
 Cenário: 2 - Atualizar item
   Dado que já existe um arquivo já importado com sucesso
   E que há uma categoria com ao menos 1 itens
-  E é adicionado ao final do nome do item "hipt hopt"
+  E é adicionado ao final do nome do item 'hipt hopt'
   Quando atualizo o item
-  Então o item é atualizado com sucesso e o nome contém "hipt hopt"
+  Então o item é atualizado com sucesso e o nome contém 'hipt hopt'
 
-Cenário: 3 - Atualizar item inesistente
+Cenário: 3 - Atualizar item inexistente
   Dado que já existe um arquivo já importado com sucesso
   E que há uma categoria com ao menos 1 itens
-  E há um item inesistente na categoria
-  E é adicionado ao final do nome do item "hipt hopt"
+  E há um item inexistente na categoria
+  E é adicionado ao final do nome do item 'hipt hopt'
   Quando atualizo o item
-  Então o erro "Item inesistente" é gerado
+  Então o erro 'Item inexistente' é gerado para o item
 
 Cenário: 4 - Excluir item
   Dado que já existe um arquivo já importado com sucesso
@@ -29,10 +29,10 @@ Cenário: 4 - Excluir item
   Então o item é excluído com sucesso
 
 
-Cenário: 5 - Excluir item inesistente
+Cenário: 5 - Excluir item inexistente
   Dado que já existe um arquivo já importado com sucesso
   E que há uma categoria com ao menos 1 itens
-  E há um item inesistente na categoria
+  E há um item inexistente na categoria
   Quando excluo o item
-  Então o erro "Item inesistente" é gerado
+  Então o erro 'Item inexistente' é gerado
 

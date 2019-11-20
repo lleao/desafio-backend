@@ -9,7 +9,7 @@ import org.junit.runner.RunWith;
  * To run cucumber test
  */
 @RunWith(Cucumber.class)
-@CucumberOptions(features = "classpath:features", extraGlue = "br.com.lcmleao")
+@CucumberOptions(features = "classpath:features")
 public class CucumberTest {
 
 }

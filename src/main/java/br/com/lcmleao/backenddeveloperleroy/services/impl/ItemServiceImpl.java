@@ -53,7 +53,7 @@ public class ItemServiceImpl implements ItemService {
      */
     @Override
     public ItemDTO atualizar(Long categoryId, ItemDTO item) {
-        Item itemEntity = itemRepository.findById(item.getId()).orElseThrow(() -> new ItemException("Item inesistente"));
+        Item itemEntity = itemRepository.findById(item.getId()).orElseThrow(() -> new ItemException("Item inexistente"));
         itemEntity = merge(itemEntity, item);
         itemEntity = itemRepository.save(itemEntity);
         return toDTO(itemEntity);
@@ -66,7 +66,7 @@ public class ItemServiceImpl implements ItemService {
      */
     @Override
     public void excluir(Long categoryId, Long itemId) {
-        Item itemEntity = itemRepository.findById(itemId).orElseThrow(() -> new ItemException("Item inesistente"));
+        Item itemEntity = itemRepository.findById(itemId).orElseThrow(() -> new ItemException("Item inexistente"));
         itemRepository.delete(itemEntity);
     }
 

@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 @RunWith(Cucumber.class)
-@CucumberOptions(features = "classpath:features", extraGlue = "br.com.lcmleao", plugin = {"pretty",
+@CucumberOptions(features = "classpath:features", plugin = {"pretty",
 		"json:target/cucumber-report.json"})
 public class BackendDeveloperLeroyApplicationTests {
 

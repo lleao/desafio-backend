@@ -10,11 +10,11 @@ Cenário: 1 - Lista de planilha
 Cenário: 2 - Obter planilha por id
   Dado que já existe um arquivo já importado com sucesso
   Quando consulto uma planilha existente por id
-  Então a categoria é retornada
+  Então a planilha é retornada
 
-Cenário: 3 - Obter planilha inesistente
+Cenário: 3 - Obter planilha inexistente
   Dado que já existe um arquivo já importado com sucesso
-  Quando consulto uma categoria inexistente por id
+  Quando consulto uma planilha inexistente por id
   Então o erro de 'Planilha não existe' deve ocorrer
 
 Cenário: 4 - Processar planilha com sucesso
